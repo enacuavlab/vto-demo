@@ -1,0 +1,125 @@
+diff --git a/conf/airframes/ENAC/rover_ostrich.xml b/conf/airframes/ENAC/rover_ostrich.xml
+index 15478f989..78955ee99 100644
+--- a/conf/airframes/ENAC/rover_ostrich.xml
++++ b/conf/airframes/ENAC/rover_ostrich.xml
+@@ -72,17 +72,20 @@
+ 
+   <section name="IMU" prefix="IMU_">
+   
+-    <define name="GYRO_P_SIGN" value="1"/>
++    <!--define name="GYRO_P_SIGN" value="1"/>
+     <define name="GYRO_Q_SIGN" value="-1"/>
+-    <define name="GYRO_R_SIGN" value="-1"/> <!-- ugly hack for dead accel -->
++    <define name="GYRO_R_SIGN" value="-1"/>
+ 
+     <define name="ACCEL_X_SIGN" value="1"/>
+     <define name="ACCEL_Y_SIGN" value="-1"/>
+-    <define name="ACCEL_Z_SIGN" value="-1"/>
++    <define name="ACCEL_Z_SIGN" value="-1"/-->
+     
+     <define name="BODY_TO_IMU_PHI"   value="0." unit="deg"/>
++    <define name="BODY_TO_IMU_THETA" value="180." unit="deg"/>
++    <define name="BODY_TO_IMU_PSI"   value="-8." unit="deg"/>
++    <!--define name="BODY_TO_IMU_PHI"   value="0." unit="deg"/>
+     <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+-    <define name="BODY_TO_IMU_PSI"   value="0." unit="deg"/>
++    <define name="BODY_TO_IMU_PSI"   value="-8." unit="deg"/-->
+   </section>
+ 
+   <section name="AHRS" prefix="AHRS_">
+@@ -135,7 +138,7 @@
+     <define name="ALT_SHIFT_PLUS_PLUS" value="5"/>
+     <define name="ALT_SHIFT_PLUS"      value="1"/>
+     <define name="ALT_SHIFT_MINUS"     value="-1"/>
+-    <define name="AC_ICON"             value="quadrotor_x"/>
++    <define name="AC_ICON"             value="rover"/>
+   </section>
+ 
+ </airframe>
+diff --git a/conf/flight_plans/ENAC/demo_aruco_drop_indoor.xml b/conf/flight_plans/ENAC/demo_aruco_drop_indoor.xml
+index cb9fc2341..2624b984e 100644
+--- a/conf/flight_plans/ENAC/demo_aruco_drop_indoor.xml
++++ b/conf/flight_plans/ENAC/demo_aruco_drop_indoor.xml
+@@ -1,6 +1,6 @@
+ <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+ 
+-<flight_plan alt="149" ground_alt="146" lat0="43.5640917" lon0="1.4829201" wp_frame="ltp" max_dist_from_home="20" name="Drop on Tag (ENAC indoor)" security_height="0.3">
++<flight_plan alt="148" ground_alt="146" lat0="43.5640917" lon0="1.4829201" wp_frame="ltp" max_dist_from_home="20" name="Drop on Tag (ENAC indoor)" security_height="0.3">
+   <header>
+     #ifndef SwitchServoOn
+     #define SwitchServoOn(_x) {}
+@@ -62,17 +62,15 @@
+   </sectors>
+   <variables>
+     <variable init="0.1" var="fp_throttle"/>
+-    <variable init=".5" var="drop_height" min="0.2" max="5." step="0.1"/>
+-    <variable init="3." var="search_height" min="0.5" max="8." step="0.1"/>
++    <variable init="1." var="drop_height" min="0.2" max="5." step="0.1"/>
++    <variable init="2." var="search_height" min="0.5" max="8." step="0.1"/>
+     <variable init="42." var="tag_distance"/>
+     <variable init="false" type="bool" var="tag_valid"/>
+     <abi_binding name="JEVOIS_MSG" handler="fp_tag_cb"/>
+   </variables>
+   <modules>
+     <module name="nav" type="survey_rectangle_rotorcraft"/>
+-    <module name="tag_tracking">
+-      <define name="TAG_TRACKING_SIM_WP" value="WP_TRUCK"/>
+-    </module>
++    <module name="tag_tracking"/>
+     <module name="follow">
+       <define name="FOLLOW_AC_ID" value="51"/>
+       <define name="FOLLOW_WAYPOINT_ID" value="WP_ROVER"/>
+@@ -133,16 +131,18 @@
+ 
+     <block name="Drop Package" strip_button="Drop Package" group="tag">
+       <call_once fun="jevois_stream(true)"/>
+-      <go wp="TAG"/>
+-      <stay wp="TAG" until="(stage_time @GT 3 @AND tag_tracking.status == TAG_TRACKING_RUNNING) @OR (stage_time @GT 15)"/>
+-      <stay wp="TAG" climb="-0.5" vmode="climb" until="((tag_distance @LT drop_height) @AND tag_valid) @OR (GetPosHeight() @LT drop_height/2.)" post_call="tag_valid = false"/>
++      <go wp="TAG" height="search_height"/>
++      <stay wp="TAG" until="(stage_time @GT 3 @AND tag_tracking.status == TAG_TRACKING_RUNNING) @OR (stage_time @GT 15)" height="search_height"/>
++      <stay wp="TAG" climb="nav_descend_vspeed" vmode="climb" until="((tag_distance @LT drop_height) @AND tag_valid) @OR (GetPosHeight() @LT drop_height/2.)" post_call="tag_valid = false"/>
+       <call_once fun="DropOpen()"/>
+-      <stay wp="TAG" until="stage_time @GT 3" alt="WaypointAlt(WP_STDBY)"/>
++      <stay wp="TAG" until="stage_time @GT 3" alt="search_height"/>
+       <set var="tag_tracking.motion_type" value="TAG_TRACKING_FIXED_POS"/>
++      <set var="follow_follow_wp_status" value="MODULES_STOP"/>
+       <deroute block="Land"/>
+     </block>
+ 
+     <block name="Goto Rover" strip_button="Goto Rover" group="tag">
++      <set var="follow_follow_wp_status" value="MODULES_START"/>
+       <go wp="ROVER"/>
+       <call_once fun="jevois_stream(true)"/>
+       <stay wp="ROVER" until="stage_time @GT 2"/>
+diff --git a/sw/airborne/firmwares/rotorcraft/guidance/guidance_h.c b/sw/airborne/firmwares/rotorcraft/guidance/guidance_h.c
+index 0f5774d86..c29c1a5b4 100644
+--- a/sw/airborne/firmwares/rotorcraft/guidance/guidance_h.c
++++ b/sw/airborne/firmwares/rotorcraft/guidance/guidance_h.c
+@@ -619,6 +619,9 @@ void guidance_h_from_nav(bool in_flight)
+ #else
+     INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_carrot);
+ 
++    // make run guidance is in position and heading control
++    ClearBit(guidance_h.sp.mask, 5);
++    ClearBit(guidance_h.sp.mask, 7);
+     guidance_h_update_reference();
+ 
+ #if GUIDANCE_HEADING_IS_FREE
+diff --git a/sw/airborne/modules/computer_vision/tag_tracking.c b/sw/airborne/modules/computer_vision/tag_tracking.c
+index e354e81f3..96cfeccfa 100644
+--- a/sw/airborne/modules/computer_vision/tag_tracking.c
++++ b/sw/airborne/modules/computer_vision/tag_tracking.c
+@@ -395,9 +395,9 @@ void tag_tracking_compute_speed(void)
+   if (tag_tracking.status == TAG_TRACKING_RUNNING) {
+     // compute speed command as estimated tag speed + gain * position error
+     struct NedCoor_f pos = *stateGetPositionNed_f();
+-    tag_tracking.speed_cmd.x = tag_tracking.speed.x + tag_tracking.kp * (pos.x - tag_tracking.pos.x);
+-    tag_tracking.speed_cmd.y = tag_tracking.speed.y + tag_tracking.kp * (pos.y - tag_tracking.pos.y);
+-    tag_tracking.speed_cmd.z = tag_tracking.speed.z + tag_tracking.kpz * (pos.z - tag_tracking.pos.z);
++    tag_tracking.speed_cmd.x = tag_tracking.speed.x + tag_tracking.kp * (tag_tracking.pos.x - pos.x);
++    tag_tracking.speed_cmd.y = tag_tracking.speed.y + tag_tracking.kp * (tag_tracking.pos.y - pos.y);
++    tag_tracking.speed_cmd.z = tag_tracking.speed.z + tag_tracking.kpz * (tag_tracking.pos.z - pos.z);
+     VECT2_STRIM(tag_tracking.speed_cmd, -TAG_TRACKING_MAX_SPEED, TAG_TRACKING_MAX_SPEED); // trim max horizontal speed
+     BoundAbs(tag_tracking.speed_cmd.z, TAG_TRACKING_MAX_VZ); // tim max vertical speed
+   }
