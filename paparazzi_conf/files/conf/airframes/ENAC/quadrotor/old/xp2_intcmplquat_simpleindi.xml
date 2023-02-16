@@ -1,0 +1,108 @@
+<!DOCTYPE airframe SYSTEM "../../airframe.dtd">
+
+<airframe name="Explorer">
+
+  <firmware name="rotorcraft">
+
+    <configure name="PERIODIC_FREQUENCY" value="1000"/>
+    <configure name="AHRS_PROPAGATE_FREQUENCY" value="$(PERIODIC_FREQUENCY)"/>
+  
+    <target name="ap" board="tawaki_1.0">
+      <module name="radio_control" type="sbus"/>
+      <define name="RADIO_KILL_SWITCH" value="RADIO_GAIN1"/>
+      <configure name="BARO_PERIODIC_FREQUENCY" value="50"/>
+
+      <define name="STABILIZATION_INDI_G1_P" value="0.035"/>
+      <define name="STABILIZATION_INDI_G1_Q" value="0.030"/>
+      <define name="STABILIZATION_INDI_G1_R" value="0.005"/>
+      <define name="STABILIZATION_INDI_G2_R" value="0.15"/>
+
+    </target>
+
+    <target name="nps" board="pc">
+      <module name="fdm" type="jsbsim"/>
+      <module name="radio_control" type="datalink"/>
+
+      <define name="INDI_RPM_FEEDBACK" value="FALSE"/>
+      <define name="CLIMB_VSPEED" value="0.8"/>
+      <define name="STABILIZATION_INDI_G1_P" value="0.05"/>
+      <define name="STABILIZATION_INDI_G1_Q" value="0.025"/>
+      <define name="STABILIZATION_INDI_G1_R" value="0.0022"/>
+      <define name="STABILIZATION_INDI_G2_R" value="0.0"/>
+
+    </target>
+
+
+    <module name="telemetry" type="xbee_api"/>
+
+    <module name="board" type="tawaki">
+      <define name="IMU_MPU_LOWPASS_FILTER" value="MPU60X0_DLPF_256HZ"/>
+      <define name="IMU_MPU_ACCEL_LOWPASS_FILTER" value="MPU60X0_DLPF_ACC_218HZ"/>
+      <define name="IMU_MPU_SMPLRT_DIV" value="0"/>
+    </module>
+
+    <module name="tlsf"/>
+    <module name="pprzlog"/>
+    <module name="logger" type="sd_chibios"/>
+    <module name="flight_recorder"/>
+
+    <module name="fc_rotor">
+      <define name="FCROTOR_STARTED" value="FALSE"/>
+    </module>
+
+    <!--Tawaki -->
+    <module name="extra_dl">
+      <configure name="EXTRA_DL_PORT" value="UART7"/>
+      <configure name="EXTRA_DL_BAUD" value="B115200"/>
+    </module>
+
+    <!--Tawaki: RC2 TX -->
+    <module name="e_identification_fr">
+     <configure name="E_ID_PORT" value="UART6"/>
+      <configure name="E_ID_BAUD" value="B115200"/>
+    </module>
+
+    <!--Info: Tawaki(Auxa1):STM32_PWM_USE_TIM5, Apogee: PPMin -->
+    <module name="light_scheduler">
+      <define name="STM32_PWM_USE_TIM5"/>
+      <define name="WS2812_NB_LEDS" value="12"/>
+      <define name="WS2812_SEQUENCE" value="2"/>
+    </module>
+
+    <!--Tawaki: Servo-switch S4 -->
+    <module name="actuators" type="pwm"/>
+    <module name="switch" type="servo"/>
+
+    <module name="actuators" type="dshot"/>
+
+    <module name="gps" type="datalink"/>
+    <configure name="USE_MAGNETOMETER" value="FALSE"/>
+
+    <module name="ins" type="gps_passthrough"/>
+
+    <module name="ahrs" type="int_cmpl_quat">
+      <define name="AHRS_USE_GPS_HEADING"   value="TRUE"/>
+      <define name="AHRS_HEADING_UPDATE_GPS_MIN_SPEED" value="0"/>
+    </module>
+
+    <module name="motor_mixing"/>
+    <module name="stabilization" type="indi_simple"/>
+
+  </firmware>
+
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_actu_$AC_ID.xml"/>
+
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_imu_$AC_ID.xml"/>
+
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_stabcom_$AC_ID.xml"/>
+  
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_stabindisimple_$AC_ID.xml"/>
+
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_guid_$AC_ID.xml"/>
+
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_cmdmixsim_$AC_ID.xml"/>
+  
+  <include href="conf/airframes/ENAC/quadrotor/xp2/xp_com.xml"/>
+ 
+
+</airframe>
