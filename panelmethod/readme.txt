@@ -1,3 +1,9 @@
+# Python package requested
+
+sudo apt-get install python3-pyclipper python3-shapely
+
+
+
 # OPTITRACK MOTIVE STREAM CONFIGURATION
 #   Asset Markers : ON 
 #   Rigid Bodies : ON of OFF
@@ -5,22 +11,22 @@
 # Select only BUILDINGS_xxx
 #
 
-./exec_getbuildings.py -i material/'Take 2022-11-15 03.10.48 PM.csv' -o material/outputfromtake.csv
+./exec_getbuildings.py -i /tmp/'Take 2022-11-15 03.10.48 PM.csv' -o tmp/outputfromtake.csv
 or
-./exec_getbuildings.py -o material/outputfromnatnet.csv
+./exec_getbuildings.py -o /tmp/outputfromnatnet.csv
 
 
 
-./exec_genmatrix.py -i material/outputfromtake.csv -o material/outputfromtake.json
+./exec_genmatrix.py -i /tmp/outputfromtake.csv -o /tmp/outputfromtake.json
 or
-./exec_genmatrix.py -i material/outputfromnatnet.csv -o material/outputfromnatnet.json
+./exec_genmatrix.py -i /tmp/outputfromnatnet.csv -o /tmp/outputfromnatnet.json
 
 
 
 
-./exec_display.py -i material/outputfromtake.json
+./exec_display.py -i /tmp/outputfromtake.json
 or
-./exec_display.py -i material/outputfromnatnet.json
+./exec_display.py -i /tmp/outputfromnatnet.json
 
 
 
@@ -32,9 +38,9 @@ or
 # Select rigibodies : HELMET_888 and TELLO_xxx
 #
 
-./exec_run.py -i material/outputfromtake.json
+./exec_run.py -i /tmp/outputfromtake.json
 or
-./exec_run.py -i material/outputfromnatnet.json
+./exec_run.py -i /tmp/outputfromnatnet.json
 
 
 
