@@ -1,5 +1,0 @@
-<airframe>
-  <servos driver="Pwm">	
-    <servo name="SWITCH" no="4" min="1000" neutral="1000" max="2000"/>
-  </servos>	
-</airframe>

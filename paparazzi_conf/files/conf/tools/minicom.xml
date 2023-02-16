@@ -1,4 +1,0 @@
-<program command="$minicom" name="Minicom">
-  <arg constant="/dev/ttyUSB1" flag="-D"/>
-</program>
-
