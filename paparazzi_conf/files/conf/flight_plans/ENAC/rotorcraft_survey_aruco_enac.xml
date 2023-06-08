@@ -54,7 +54,7 @@
       <call_once fun="NavResurrect()"/>
       <attitude pitch="0" roll="0" throttle="0.1" vmode="throttle" until="stage_time>2"/>
       <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
-      <stay vmode="climb" climb="nav_climb_vspeed" wp="STDBY"/> 
+      <stay vmode="climb" climb="nav.climb_vspeed" wp="STDBY"/> 
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
@@ -82,12 +82,12 @@
       <!--exception cond="NavDetectGround()" deroute="Holding point"/-->
       <exception cond="!nav_is_in_flight()" deroute="Kill landed"/>
       <!--call_once fun="NavStartDetectGround()"/-->
-      <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
+      <stay climb="nav.descend_vspeed" vmode="climb" wp="TD"/>
     </block>
     <block name="Ramp down">
       <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
-      <exception cond="guidance_v_delta_t @LT 0.05*9600." deroute="Kill landed"/>
-      <set var="fp_throttle" value="guidance_v_delta_t/9600."/>
+      <exception cond="guidance_v.delta_t @LT 0.05*9600." deroute="Kill landed"/>
+      <set var="fp_throttle" value="guidance_v.delta_t/9600."/>
       <stay throttle="fp_throttle-0.02*stage_time" vmode="throttle" wp="TARGET"/>
     </block>
     <block name="Kill landed">
