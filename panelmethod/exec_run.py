@@ -17,18 +17,21 @@ import time
 #tellos_routeur = {61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELLO-ED42A3',64:'TELLO-ED4381'}
 #tellos_docker = {60:'TELLO-ED4310',65:'TELLO-F0B594',66:'TELLO-99CE21'}
 
-tellos_routeur = {61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELLO-ED42A3',64:'TELLO-ED4381',65:'TELLO-F0B594',66:'TELLO-99CE21'}
-tellos_docker = {60:'TELLO-ED4310',67:'TELLO-99CE5A',68:'TELLO-99CE4E'}
-#tellos_docker = {67:'TELLO-99CE5A',68:'TELLO-99CE4E'}
+#tellos_routeur = {61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELLO-ED42A3',64:'TELLO-ED4381',65:'TELLO-F0B594',66:'TELLO-99CE21'}
+#tellos_docker = {60:'TELLO-ED4310',67:'TELLO-99CE5A',68:'TELLO-99CE4E'}
+
+tellos_routeur = {61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELLO-ED42A3',64:'TELLO-ED4381',65:'TELLO-F0B594',66:'TELLO-99CE21',67:'TELLO-99CE5A',68:'TELLO-99CE4E'}
+tellos_docker = {60:'TELLO-ED4310'}
 
 #------------------------------------------------------------------------------
 #tellos_selected = (60,)
-tellos_selected = (65,)
+#tellos_selected = (65,)
 #tellos_selected = (66,)
 #tellos_selected = (67,)
 #tellos_selected = (68,)
 #tellos_selected = (65,66,)
 #tellos_selected = (67,68,)
+tellos_selected = (65,66,67,)
 #tellos_selected = (66,67,68,)
 #tellos_selected = (65,66,67,68,)
 
@@ -127,10 +130,10 @@ def main(arena,telloNet):
 
   commands = queue.Queue()
   commands.put(('command',))
-#  commands.put(('streamon',66))
+  if rigidBodyDict.get(66) is not None: commands.put(('streamon',66))
 #  commands.put(('downvision 0',66))
-  commands.put(('streamon',))
-  commands.put(('downvision 0',))
+#  commands.put(('streamon',))
+#  commands.put(('downvision 0',))
 
   threadMission = Thread_mission(commands,acTarg[0],rigidBodyDict,vehicleList,arena)
   threadMission.start()

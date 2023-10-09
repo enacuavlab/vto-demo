@@ -11,7 +11,7 @@ import numpy as np
 import queue
 import time
 
-telloSpeed = 0.3
+telloSpeed = 0.7 # 0.1 to 0.8
 telloFreq = 10
 
 #------------------------------------------------------------------------------
@@ -86,8 +86,7 @@ class Thread_mission(threading.Thread):
       for i,v in enumerate(self.vehicles):
         norm = np.linalg.norm(flow_vels[i])
         flow_vels[i] = flow_vels[i]/norm
-        limited_norm = np.clip(norm,0., 0.8)
-        fixed_speed = telloSpeed
+        limited_norm = np.clip(norm,0., telloSpeed)
         vel_enu = flow_vels[i]*limited_norm
         heading = np.arctan2(targetPos[1]-v.position[1],targetPos[0]-v.position[0])
         v.Set_Desired_Velocity(vel_enu, method='None')
