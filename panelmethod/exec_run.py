@@ -35,6 +35,8 @@ tellos_selected = (65,66,67,)
 #tellos_selected = (66,67,68,)
 #tellos_selected = (65,66,67,68,)
 
+tello_selected_video=65
+
 acTarg = [888,'Helmet']
 
 sourceStrength = 0.95 # Tello repelance
@@ -130,7 +132,8 @@ def main(arena,telloNet):
 
   commands = queue.Queue()
   commands.put(('command',))
-  if rigidBodyDict.get(66) is not None: commands.put(('streamon',66))
+
+  if rigidBodyDict.get(tello_selected_video) is not None: commands.put(('streamon',tello_selected_video))
 #  commands.put(('downvision 0',66))
 #  commands.put(('streamon',))
 #  commands.put(('downvision 0',))
