@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 
-from natnet import Thread_natnet
-
+#from natnet import Thread_natnet
+import sys
+sys.path.append("/home/pprz/Projects/vto-natnet/common")
+from natnet41 import Rigidbody,Thread_natnet
 import threading
+
 import numpy as np
 import subprocess
 import queue
@@ -10,11 +13,11 @@ import socket
 import time
 
 #------------------------------------------------------------------------------
-tellos_routeur = {61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELLO-ED42A3',64:'TELLO-ED4381',65:'TELLO-F0B594',66:'TELLO-99CE21'}
+tellos_routeur = {61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELLO-ED42A3',64:'TELLO-ED4381',65:'TELLO-F0B594',66:'TELLO-99CE21',69:'TELLO-99131A'}
 tellos_docker = {60:'TELLO-ED4310',67:'TELLO-99CE5A',68:'TELLO-99CE4E'}
 
 #tellos_selected = (65,)
-tellos_selected = (65,66)
+tellos_selected = (65,69)
 
 acTarg = [888,'Helmet']
 
@@ -27,16 +30,21 @@ optiFreq = 20 # Check that optitrack stream at least with this value
 
 
 #------------------------------------------------------------------------------
-class Rigidbody(): # should be compliant with Thread_natnet 
-                   # TODO put in natnet.py
-
-  def __init__(self,ac_id):
-    self.ac_id = ac_id
-    self.valid = False
-    self.position = np.zeros(3)
-    self.velocity = np.zeros(3)
-    self.heading = 0.
-    self.quat = np.zeros(4)
+#class Rigidbody(): # should be compliant with Thread_natnet 
+#                   # TODO put in natnet.py
+#
+#  def __init__(self,ac_id):
+#    self.ac_id = ac_id
+#    self.valid = False
+#    self.position = np.zeros(3)
+#    self.velocity = np.zeros(3)
+#    self.heading = 0.
+#    self.quat = np.zeros(4)
+#
+#------------------------------------------------------------------------------
+class Flag(threading.Event):
+  def __bool__(self):
+    return self.is_set()
 
 #------------------------------------------------------------------------------
 class Vehicle():
@@ -229,6 +237,7 @@ def initNetDrone():
 
 #------------------------------------------------------------------------------
 def main(telloNet):
+  flag = Flag()
 
   vehicleList = [];
   rigidBodyDict = {};
@@ -237,7 +246,7 @@ def main(telloNet):
     vehicleList.append(Vehicle(ac))
     rigidBodyDict[ac]=Rigidbody(ac)
 
-  threadMotion = Thread_natnet(rigidBodyDict,optiFreq)
+  threadMotion = Thread_natnet(flag,rigidBodyDict,optiFreq)
   threadMotion.start()
 
   commands = queue.Queue()

@@ -1,13 +1,15 @@
 #!/usr/bin/python3
+import sys
+sys.path.insert(0,"/home/pprz/Projects/vto-natnet/common")
+from natnet41 import Rigidbody, Thread_natnet
+import threading
 
-from natnet import Thread_natnet
 from mission import Thread_mission
 from vehicle import Vehicle
 from buildingOut import BuildingOut
 
 import numpy as np
 import json
-import sys
 import argparse
 import subprocess
 import queue
@@ -33,9 +35,11 @@ tellos_routeur = {60:'TELLO-99120E',61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELL
 #tellos_selected = (68,)
 #tellos_selected = (65,66,)
 #tellos_selected = (67,68,)
-tellos_selected = (65,66,67,)
+#tellos_selected = (65,66,67,)
 #tellos_selected = (66,67,68,)
 #tellos_selected = (65,66,67,68,)
+
+tellos_selected = (65,)
 
 tello_selected_video=65
 
@@ -66,18 +70,22 @@ class ArenaMap():
     self.windT = 0
     self.buildings = []
 
+#------------------------------------------------------------------------------
+class Flag(threading.Event):
+  def __bool__(self):
+    return self.is_set()
 
 #------------------------------------------------------------------------------
-class Rigidbody():
-  def __init__(self,ac_id):
-    self.ac_id = ac_id
-    self.valid = False
-    self.position = np.zeros(3)
-    self.velocity = np.zeros(3)
-    self.heading = 0.
-    self.quat = np.zeros(4)
-
-
+#class Rigidbody():
+#  def __init__(self,ac_id):
+#    self.ac_id = ac_id
+#    self.valid = False
+#    self.position = np.zeros(3)
+#    self.velocity = np.zeros(3)
+#    self.heading = 0.
+#    self.quat = np.zeros(4)
+#
+#
 #------------------------------------------------------------------------------
 def initNetDrone():
   telloDic = {}
@@ -121,7 +129,7 @@ def initArena(jsonfile):
 
 #------------------------------------------------------------------------------
 def main(arena,telloNet):
-
+  flag = Flag()
   vehicleList = [];
   rigidBodyDict = {};
   rigidBodyDict[acTarg[0]] = Rigidbody(acTarg[0])
@@ -129,7 +137,7 @@ def main(arena,telloNet):
     vehicleList.append(Vehicle(ac,sourceStrength))
     rigidBodyDict[ac]=Rigidbody(ac)
 
-  threadMotion = Thread_natnet(rigidBodyDict,optiFreq)
+  threadMotion = Thread_natnet(flag,rigidBodyDict,optiFreq)
   threadMotion.start()
 
   commands = queue.Queue()

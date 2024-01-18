@@ -1,16 +1,18 @@
-#!/usr/bin/python3
-
-import struct
-import time
-import socket
-from threading import Thread
-
+#!/usr/bin/env python3
 import sys
-import argparse
+sys.path.insert(0,"/home/pprz/Projects/vto-natnet/common")
+from NatNetClient import NatNetClient
+
 import csv
+import argparse
+import time
 import math
 import copy
+from collections import deque
 import numpy as np
+
+buildingDic = {}
+loop = True
 
 #--------------------------------------------------------------------------------
 #
@@ -23,7 +25,11 @@ import numpy as np
 # This program gets top surface as building rigidbody (Building_xxx)
 
 # Option 1: From Optitrack Motive tracking data as a csv extracted file
-#   Export extracting data
+#   Export extracting data#
+
+#     Header information
+#     Markers
+#
 #     Axis Convention : Custom
 #       X Axis : Left(X+)
 #       Y Axis : Backward(Z-)
@@ -46,7 +52,6 @@ import numpy as np
 #   Data Port : 1511
 #   Multicast Interface : 239.255.42.99
 
-
 #--------------------------------------------------------------------------------
 class LightBuilding():
   def __init__(self,name,vertices): # Buildings(obstacles) are defined by coordinates of their vertices.
@@ -54,8 +59,17 @@ class LightBuilding():
     self.vertices = vertices
 
 #--------------------------------------------------------------------------------
-def sort_verts(buildings,buildingList):
-  for item1 in buildings.items():
+def write_verts(filename,buildingList):
+  with open(filename,'w+') as out:
+    for elt in buildingList:
+      stringvalues = elt.name
+      for vert in elt.vertices:
+        stringvalues = stringvalues + ("[%.8f %.8f %.8f]" % (vert[0],vert[1],vert[2]))
+      out.write(stringvalues+'\n')
+
+#--------------------------------------------------------------------------------
+def sort_verts(buildingList):
+  for item1 in buildingDic.items():
     pts = np.empty((len(item1[1].items()),2))
     for i,item2 in enumerate(item1[1].items()): pts[i] = np.array(item2[1][0:2])
     angles = []
@@ -72,8 +86,10 @@ def sort_verts(buildings,buildingList):
     b = LightBuilding(item1[0],verts)
     buildingList.append(b)
 
-  
-def csvfile_parse(inputfile,buildingList):
+#--------------------------------------------------------------------------------
+def csvfile_parse(inputfile):
+  global buildingDic
+
   with open(inputfile, newline='') as csvfile:
     csvreader = csv.reader(csvfile)
     for j in range(3): dummy = next(csvreader)
@@ -84,64 +100,30 @@ def csvfile_parse(inputfile,buildingList):
     for i in range(2,len(fields),3):
       buildingName,markerName  = fields[i].split(':')
       floatLst=[float(x)/1000.0 for x in values[i:i+3]]
-      if (not buildings) or (not buildingName in buildings): buildings[buildingName]={markerName:floatLst}
-      buildings[buildingName].update({markerName:floatLst})
-    sort_verts(buildings,buildingList)
+      if (not buildingDic) or (not buildingName in buildingDic): buildingDic[buildingName]={markerName:floatLst}
+      buildingDic[buildingName].update({markerName:floatLst})
 
+#------------------------------------------------------------------------------
+def receiveRigidBodyMarkerSetList( rigid_body_data, marker_set_data, stamp ):
+  global buildingDic
+  global loop
+  loop = False
 
-#--------------------------------------------------------------------------------
-Vector3 = struct.Struct( '<fff' )
+#  for rigid_body in rigid_body_data.rigid_body_list:
+#    print(str(rigid_body.id_num))
 
-def natnet_parse(in_socket,buildings):
-  data=bytearray(0)
-  # 64k buffer size
-  recv_buffer_size=64*1024
-  data, addr = in_socket.recvfrom( recv_buffer_size )
-  if len( data ) > 0 :
-    message_id = int.from_bytes( data[0:2], byteorder='little' )
-    packet_size = int.from_bytes( data[2:4], byteorder='little' )
-    if message_id == 7 : # NAT_FRAMEOFDATA :
-      offset = 4
-      frame_number = int.from_bytes( data[offset:offset+4], byteorder='little' )
-      offset += 4
-      marker_set_count = int.from_bytes( data[offset:offset+4], byteorder='little' )
-      offset += 4
-      for i in range( 0, marker_set_count ):
-        model_name, separator, remainder = bytes(data[offset:]).partition( b'\0' )
-        offset += len( model_name ) + 1
-        buildingName = model_name.decode( 'utf-8' )
-        #print("Model name: ",buildingName)
-        marker_count = int.from_bytes( data[offset:offset+4], byteorder='little' )
-        offset += 4
-        #print( "Marker Count    : ", marker_count )
-        for j in range( 0, marker_count ):
-          floatLst = Vector3.unpack( data[offset:offset+12] )
-          offset += 12
-          #print( "\tMarker %3.1d : [%3.2f,%3.2f,%3.2f]"%( j, pos[0], pos[1], pos[2] ))
-          if buildingName.startswith('Building_'):
-            markerName = str(j)
-            if (not buildings) or (not buildingName in buildings): buildings[buildingName]={markerName:floatLst}
-            buildings[buildingName].update({markerName:floatLst})
-
-
-def natnet_get(buildingList):
-  data_sock = socket.socket( socket.AF_INET,socket.SOCK_DGRAM,0)
-  data_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-  data_sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton("239.255.42.99") + socket.inet_aton("0.0.0.0"))
-  try:
-    data_sock.bind( ("0.0.0.0", 1511) )
-  except socket.error as msg:
-    print("ERROR: data socket error occurred:\n%s" %msg)
-    print("  Check Motive/Server mode requested mode agreement.  You requested Multicast ")
-  stop_threads = False
-  buildings = {}
-  data_thread = Thread( target = natnet_parse, args = (data_sock,buildings ))
-  data_thread.start()
-  time.sleep(3)
-  stop_threads = True
-  data_thread.join()
-  sort_verts(buildings,buildingList)
-
+  for marker_data in marker_set_data.marker_data_list:
+    model_name, separator, remainder = marker_data.model_name.partition( b'\0' )
+    buildingName = model_name.decode( 'utf-8' )
+    if not buildingName.startswith('Building_'):
+      continue
+    marker_count = len(marker_data.marker_pos_list)
+    for j in range(marker_count):
+      markerName = str(j)
+      pos = marker_data.marker_pos_list[j]
+      floatLst=[float(x) for x in pos]
+      if (not buildingDic) or (not buildingName in buildingDic): buildingDic[buildingName]={markerName:floatLst}
+      buildingDic[buildingName].update({markerName:floatLst})
 
 #--------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -149,19 +131,42 @@ if __name__ == '__main__':
   parser.add_argument( '-i', '--input_csvtakefile')
   parser.add_argument( '-o', '--output_csvfile')
   args = parser.parse_args()
+  buildingList = []
 
   if args.output_csvfile:
-    buildingList = []
     if args.input_csvtakefile:
       print("Building from take csv file")
-      csvfile_parse(args.input_csvtakefile,buildingList)
-    else:
-      print("Searching for live multicast buildings")
-      natnet_get(buildingList)
+      csvfile_parse(args.input_csvtakefile)
+      sort_verts(buildingList)
+      write_verts(args.output_csvfile,buildingList)
+      exit(0)
 
-    with open(args.output_csvfile, 'w') as out:
-      for elt in buildingList:
-        stringvalues = elt.name
-        for vert in elt.vertices:
-          stringvalues = stringvalues + ("[%.8f %.8f %.8f]" % (vert[0],vert[1],vert[2]))
-        out.write(stringvalues+'\n')
+  print("Searching for live multicast buildings")
+  natnet = NatNetClient()
+  natnet.set_server_address("192.168.1.240")
+  natnet.set_client_address('0.0.0.0')
+  natnet.set_print_level(0)  # 1 to print all frames
+  natnet.rigid_body_marker_set_list_listener = receiveRigidBodyMarkerSetList
+  
+  try:
+    is_running = natnet.run()
+    if not is_running:
+      print("Natnet error: Could not start streaming client.")
+      exit(-1)
+    time.sleep(1)
+    if not natnet.connected():
+      print("Natnet error: Fail to connect to natnet")
+      exit(-1)
+  
+    while(loop): time.sleep(1)
+    sort_verts(buildingList)
+    write_verts(args.output_csvfile,buildingList)
+    exit(0)
+  
+  except (KeyboardInterrupt, SystemExit):
+    print("Shutting down natnet interfaces...")
+    natnet.shutdown()
+  except OSError:
+    print("Natnet connection error")
+    natnet.shutdown()
+    exit(-1)
