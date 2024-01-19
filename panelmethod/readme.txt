@@ -11,7 +11,7 @@ sudo apt-get install python3-pyclipper python3-shapely
 # Select only BUILDINGS_xxx
 #
 
-./exec_getbuildings.py -i /tmp/'Take 2022-11-15 03.10.48 PM.csv' -o tmp/outputfromtake.csv
+./exec_getbuildings.py -i /tmp/'Take 2022-11-15 03.10.48 PM.csv' -o /tmp/outputfromtake.csv
 or
 ./exec_getbuildings.py -o /tmp/outputfromnatnet.csv
 
