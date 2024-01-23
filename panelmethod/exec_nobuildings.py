@@ -3,7 +3,7 @@
 #from natnet import Thread_natnet
 import sys
 sys.path.append("/home/pprz/Projects/vto-natnet/common")
-from natnet41 import Rigidbody,Thread_natnet
+from natnet41 import Rigidbody,Natnet
 import threading
 
 import numpy as np
@@ -246,8 +246,10 @@ def main(telloNet):
     vehicleList.append(Vehicle(ac))
     rigidBodyDict[ac]=Rigidbody(ac)
 
-  threadMotion = Thread_natnet(flag,rigidBodyDict,optiFreq)
-  threadMotion.start()
+  motion = Natnet(rigidBodyDict,optiFreq)
+  if not motion.running():
+    exit(-1)
+
 
   commands = queue.Queue()
 #  commands.put(('command',65))
@@ -272,7 +274,7 @@ def main(telloNet):
     print("\nWe are interrupting the program\n")
     time.sleep(1)
     threadMission.stop()
-    threadMotion.stop()
+    motion.stop()
 
     for ac in telloNet:
       sock.sendto('land'.encode(encoding="utf-8"),telloNet[ac][1])

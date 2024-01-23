@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys
 sys.path.insert(0,"/home/pprz/Projects/vto-natnet/common")
-from natnet41 import Rigidbody, Thread_natnet
+from natnet41 import Rigidbody,Natnet
 import threading
 
 from mission import Thread_mission
@@ -39,7 +39,7 @@ tellos_routeur = {60:'TELLO-99120E',61:'TELLO-ED433E',62:'TELLO-ED4317',63:'TELL
 #tellos_selected = (66,67,68,)
 #tellos_selected = (65,66,67,68,)
 
-tellos_selected = (65,)
+tellos_selected = (65,69,)
 
 tello_selected_video=65
 
@@ -137,8 +137,10 @@ def main(arena,telloNet):
     vehicleList.append(Vehicle(ac,sourceStrength))
     rigidBodyDict[ac]=Rigidbody(ac)
 
-  threadMotion = Thread_natnet(flag,rigidBodyDict,optiFreq)
-  threadMotion.start()
+  motion = Natnet(rigidBodyDict,optiFreq)
+  if not motion.running():
+    exit(-1)
+
 
   commands = queue.Queue()
   commands.put(('command',))
@@ -169,7 +171,7 @@ def main(arena,telloNet):
     print("\nWe are interrupting the program\n")
     time.sleep(1)
     threadMission.stop()
-    threadMotion.stop()
+    motion.stop()
     sock.close()
     print("mainloop stopped")
 
