@@ -9,7 +9,6 @@
     <target name="ap" board="tawaki_1.1">
       <module name="radio_control" type="sbus"/>
       <define name="USE_PWM5"/>
-      <define name="USE_PWM_TIM4"/>
     </target>
     <target name="nps" board="pc">
       <module name="radio_control" type="ppm"/>
