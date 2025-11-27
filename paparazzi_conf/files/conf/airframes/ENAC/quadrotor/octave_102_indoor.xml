@@ -1,11 +1,11 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
-<airframe name="Octave101_indoor">
+<airframe name="octave_102_indoor">
 
   <description>
     * Autopilot:   TawakiV2
     * Actuators:   4 in 1  
-    * Telemetry:   XBee
+    * Telemetry:   XBee + wifi
     * GPS:         datalink
     * RC:          SBUS
   </description>
@@ -45,13 +45,10 @@
     <module name="stabilization" type="indi"/>
     <module name="guidance" type="indi"/>
 
-    <module name="ins"  type="gps_passthrough"/>
-    <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="FALSE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
-    </module>
+    <module name="ins" type="ext_pose"/>
 
     <module name="flight_recorder"/>
+
   </firmware>
 
   <servos driver="DShot">
