@@ -191,7 +191,7 @@
         <arg flag="-d" constant="/dev/ttyUSB0"/>
         <arg flag="-t" constant="xbee"/>
         <arg flag="-s" constant="57600"/>
-        <arg flag="-ac" constant="101:127.0.0.1:4244:4245"/>
+        <arg flag="-ac" constant="101:127.0.0.1:4251:4241"/>
       </program>
       <program name="NatNet3">
         <arg flag="--up_axis" constant="z_up"/>
@@ -228,7 +228,7 @@
         <arg flag="-d" constant="/dev/ttyUSB0"/>
         <arg flag="-t" constant="xbee"/>
         <arg flag="-s" constant="57600"/>
-        <arg flag="-ac" constant="102:127.0.0.1:4244:4245"/>
+        <arg flag="-ac" constant="102:127.0.0.1:4252:4242"/>
       </program>
       <program name="NatNet3">
         <arg flag="--up_axis" constant="z_up"/>

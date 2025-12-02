@@ -203,11 +203,6 @@
     <define name="FAILSAFE_FIXED_THROTTLE" value="0.4"/>
   </section>
 
-  <section name="TAG_TRACKING" prefix="TAG_TRACKING_">
-    <define name="BODY_TO_CAM_PSI" value="M_PI_2"/>
-    <define name="CAM_POS_X" value="0.15"/>
-  </section>
-
   <section name="GCS">
     <define name="ALT_SHIFT_PLUS_PLUS" value="3"/>
     <define name="ALT_SHIFT_PLUS" value="1"/>
