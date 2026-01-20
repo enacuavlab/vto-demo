@@ -1,13 +1,13 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
-<airframe name="octave_101_indoor">
+<airframe name="octave_100_indoor">
 
   <description>
-    * Autopilot:   TawakiV2
+    * Autopilot:   TawakiV1
     * Actuators:   4 in 1  
-    * Telemetry:   datalink
+    * Telemetry:   XBee
     * GPS:         datalink
-    * RC:          datalink
+    * RC:          SBUS
   </description>
 
   <firmware name="rotorcraft">
@@ -15,26 +15,28 @@
     <configure name="PERIODIC_FREQUENCY" value="500"/>
     <configure name="AHRS_PROPAGATE_FREQUENCY" value="$(PERIODIC_FREQUENCY)"/>
 
-    <target name="ap" board="tawaki_2.0">
+    <target name="ap" board="tawaki_1.0">
       <module name="radio_control" type="sbus"/>
-      <define name="RADIO_KILL_SWITCH" value="RADIO_AUX1"/>
-
       <configure name="BARO_PERIODIC_FREQUENCY" value="50"/>
+      <define name="RADIO_KILL_SWITCH" value="RADIO_GAIN1"/>
       <define name="INS_EKF2_OPTITRACK" value="TRUE"/>
+      <module name="extra_dl">
+        <configure name="EXTRA_DL_PORT" value="UART3"/>
+        <configure name="EXTRA_DL_BAUD" value="B115200"/>
+      </module>
     </target>
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="radio_control" type="ppm"/>
-      <define name="TAWAKIV2_IMU_ROT" value=""/>
-      <define name="TAWAKIV2_MAG_ROT" value=""/>
     </target>
     
-    <module name="board" type="tawaki_2.0"/>
-    
-    <module name="telemetry" type="udp"/>
-      <configure name="DATALINK_PORT" value="UART3"/>
-      <configure name="DATALINK_BAUD" value="B115200"/>
+    <module name="board" type="tawaki">
+      <define name="IMU_MPU_LOWPASS_FILTER" value="MPU60X0_DLPF_256HZ"/>
+      <define name="IMU_MPU_ACCEL_LOWPASS_FILTER" value="MPU60X0_DLPF_ACC_218HZ"/>
+      <define name="IMU_MPU_SMPLRT_DIV" value="0"/>
     </module>
+
+    <module name="telemetry" type="xbee_api"/>
 
     <module name="actuators" type="dshot">
       <configure name="DSHOT_BIDIR" value="FALSE"/>
@@ -83,7 +85,6 @@
         </field>
         <field name="neutral" value="-9,4,9" type="int[]"/>
         <field name="scale" value="{{23615,28513,23477},{9634,11630,9557}}"/>
-        <field value="TAWAKIV2_IMU_ROT"/>
       </field>
     </define>
     <define name="GYRO_CALIB" type="array">
@@ -94,7 +95,6 @@
           <field name="scale" value="false"/>
           <field name="rotation" value="true"/>
         </field>
-        <field value="TAWAKIV2_IMU_ROT"/>
       </field>
     </define>
     <define name="MAG_CALIB" type="array">
@@ -107,7 +107,6 @@
         </field>
         <field name="neutral" value="2198,709,1990" type="int[]"/>
         <field name="scale" value="{{11323,40627,32529},{16603,58387,48410}}"/>
-        <field value="TAWAKIV2_MAG_ROT"/>
       </field>
     </define>
 
