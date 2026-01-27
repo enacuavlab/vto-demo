@@ -22,6 +22,7 @@
       <configure name="BARO_PERIODIC_FREQUENCY" value="50"/>
       <define name="INS_EKF2_OPTITRACK" value="TRUE"/>
     </target>
+
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="radio_control" type="ppm"/>
@@ -32,8 +33,8 @@
     <module name="board" type="tawaki_2.0"/>
     
     <module name="telemetry" type="transparent">
-      <configure name="DATALINK_PORT" value="UART3"/>
-      <configure name="DATALINK_BAUD" value="B115200"/>
+      <configure name="MODEM_PORT" value="UART3"/>
+      <configure name="MODEM_BAUD" value="B115200"/>
     </module>
 
     <module name="actuators" type="dshot">
