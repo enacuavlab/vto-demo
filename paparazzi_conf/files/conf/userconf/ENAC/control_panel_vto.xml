@@ -269,14 +269,14 @@
         <arg flag="xbox_gamepad.xml"/>
       </program>
     </session>
-    <session name="Flight Octave_103 Indoor dual link">
+    <session name="Flight Octave_103 indoor">
       <program name="Server"/>
       <program name="PprzGCS"/>
       <program name="Data Linkpy">
         <arg flag="-d" constant="/dev/ttyUSB0"/>
         <arg flag="-t" constant="xbee"/>
         <arg flag="-s" constant="57600"/>
-        <arg flag="-ac" constant="103:127.0.0.1:4251:4241"/>
+        <arg flag="-ac" constant="103:127.0.0.1:4253:4243"/>
       </program>
       <program name="NatNet3">
         <arg flag="--up_axis" constant="z_up"/>
@@ -287,23 +287,9 @@
         <arg flag="103"/>
         <arg flag="-s" constant="192.168.1.240"/>
       </program>
-    </session>
-    <session name="Flight Octave_103 Indoor single link">
-      <program name="Server"/>
-      <program name="PprzGCS"/>
-      <program name="Data Link">
-        <arg flag="-d" constant="/dev/ttyUSB0"/>
-        <arg flag="-transport" constant="xbee"/>
-        <arg flag="-s" constant="57600"/>
-      </program>
-      <program name="NatNet3">
-        <arg flag="--up_axis" constant="z_up"/>
-        <arg flag="--long_edge" constant="near"/>
-        <arg flag="--x_side" constant="right"/>
-        <arg flag="--ac_nose" constant="far"/>
-        <arg flag="-ac" constant="103"/>
-        <arg flag="103"/>
-        <arg flag="-s" constant="192.168.1.240"/>
+      <program name="Joystick">
+        <arg flag="-ac" constant="Octave_103"/>
+        <arg flag="ENAC/frsky_light.xml"/>
       </program>
     </session>
     <session name="Flight Octave_103_104">
@@ -328,40 +314,22 @@
         <arg flag="-s" constant="192.168.1.240"/>
       </program>
     </session>
-    <session name="Flight Octave_104 Indoor dual link">
+    <session name="Fligth Ocatave_109 dual link indoor">
       <program name="Server"/>
       <program name="PprzGCS"/>
       <program name="Data Linkpy">
         <arg flag="-d" constant="/dev/ttyUSB0"/>
         <arg flag="-t" constant="xbee"/>
         <arg flag="-s" constant="57600"/>
-        <arg flag="-ac" constant="104:127.0.0.1:4252:4242"/>
+        <arg flag="-ac" constant="109:127.0.0.1:4259:4249"/>
       </program>
       <program name="NatNet3">
         <arg flag="--up_axis" constant="z_up"/>
         <arg flag="--long_edge" constant="near"/>
         <arg flag="--x_side" constant="right"/>
         <arg flag="--ac_nose" constant="far"/>
-        <arg flag="-ac" constant="104"/>
-        <arg flag="104"/>
-        <arg flag="-s" constant="192.168.1.240"/>
-      </program>
-    </session>
-    <session name="Flight Octave_104 Indoor single link">
-      <program name="Server"/>
-      <program name="PprzGCS"/>
-      <program name="Data Link">
-        <arg flag="-d" constant="/dev/ttyUSB0"/>
-        <arg flag="-transport" constant="xbee"/>
-        <arg flag="-s" constant="57600"/>
-      </program>
-      <program name="NatNet3">
-        <arg flag="--up_axis" constant="z_up"/>
-        <arg flag="--long_edge" constant="near"/>
-        <arg flag="--x_side" constant="right"/>
-        <arg flag="--ac_nose" constant="far"/>
-        <arg flag="-ac" constant="104"/>
-        <arg flag="104"/>
+        <arg flag="-ac" constant="109"/>
+        <arg flag="109"/>
         <arg flag="-s" constant="192.168.1.240"/>
       </program>
     </session>
@@ -390,23 +358,27 @@
         <arg flag="-udp_broadcast"/>
       </program>
     </session>
-    <session name="Fligth Ocatave_109 dual link indoor">
+    <session name="Flight Octave_104 indoor">
       <program name="Server"/>
       <program name="PprzGCS"/>
       <program name="Data Linkpy">
         <arg flag="-d" constant="/dev/ttyUSB0"/>
         <arg flag="-t" constant="xbee"/>
         <arg flag="-s" constant="57600"/>
-        <arg flag="-ac" constant="109:127.0.0.1:4259:4249"/>
+        <arg flag="-ac" constant="104:127.0.0.1:4254:4244"/>
       </program>
       <program name="NatNet3">
         <arg flag="--up_axis" constant="z_up"/>
         <arg flag="--long_edge" constant="near"/>
         <arg flag="--x_side" constant="right"/>
         <arg flag="--ac_nose" constant="far"/>
-        <arg flag="-ac" constant="109"/>
-        <arg flag="109"/>
+        <arg flag="-ac" constant="104"/>
+        <arg flag="104"/>
         <arg flag="-s" constant="192.168.1.240"/>
+      </program>
+      <program name="Joystick">
+        <arg flag="-ac" constant="Octave_104"/>
+        <arg flag="ENAC/frsky_light.xml"/>
       </program>
     </session>
   </section>
